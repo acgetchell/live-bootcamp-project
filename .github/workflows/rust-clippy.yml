@@ -41,11 +41,20 @@ jobs:
       - name: Install required cargo
         run: cargo install clippy-sarif sarif-fmt
 
-      - name: Run rust-clippy
+      - name: Run rust-clippy on app-service
         run:
           cargo clippy
           --all-features
+          --manifest-path ./app-service/Cargo.toml
           --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
+        continue-on-error: true
+
+      - name: Run rust-clippy on auth-service
+        run:
+          cargo clippy
+          --all-features
+          --manifest-path ./auth-service/Cargo.toml
+          --message-format=json | clippy-sarif | tee -a rust-clippy-results.sarif | sarif-fmt
         continue-on-error: true
 
       - name: Upload analysis results to GitHub
