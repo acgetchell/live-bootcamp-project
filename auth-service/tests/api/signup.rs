@@ -123,6 +123,6 @@ async fn should_return_409_if_user_already_exists() {
             .await
             .expect("Could not deserialize response body to ErrorResponse")
             .error,
-        "User already exists!".to_owned()
+        "User already exists".to_owned()
     );
 }
