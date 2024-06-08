@@ -1,5 +1,8 @@
 # Rust Web App
 
+[![Build, Test and Deploy to Prod](https://github.com/acgetchell/live-bootcamp-project/actions/workflows/prod.yml/badge.svg)](https://github.com/acgetchell/live-bootcamp-project/actions/workflows/prod.yml)
+[![rust-clippy analyze](https://github.com/acgetchell/live-bootcamp-project/actions/workflows/rust-clippy.yml/badge.svg)](https://github.com/acgetchell/live-bootcamp-project/actions/workflows/rust-clippy.yml)
+
 ## Setup & Building
 
 ```bash
