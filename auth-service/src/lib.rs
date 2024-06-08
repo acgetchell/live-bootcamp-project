@@ -12,9 +12,37 @@ use std::error::Error;
 use tower_http::services::ServeDir;
 
 pub mod app_state;
-pub mod domain;
-pub mod routes;
-pub mod services;
+pub mod domain {
+    pub mod data_stores;
+    pub mod email;
+    pub mod error;
+    pub mod password;
+    pub mod user;
+    // re-export the modules
+    pub use data_stores::*;
+    pub use email::*;
+    pub use error::*;
+    pub use password::*;
+    pub use user::*;
+}
+pub mod routes {
+    pub mod login;
+    pub mod logout;
+    pub mod signup;
+    pub mod verify_2fa;
+    pub mod verify_token;
+    // re-export the modules
+    pub use login::*;
+    pub use logout::*;
+    pub use signup::*;
+    pub use verify_2fa::*;
+    pub use verify_token::*;
+}
+pub mod services {
+    pub mod hashmap_user_store;
+    // re-export the modules
+    pub use hashmap_user_store::*;
+}
 
 pub struct Application {
     server: Serve<Router, Router>,
