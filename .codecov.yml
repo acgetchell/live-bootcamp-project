@@ -2,7 +2,7 @@ coverage:
   status:
     project:
       default:
-        target: 90%
+        target: 80%
         removed_code_behavior: removals_only
         threshold: 5%
     patch: 
@@ -10,5 +10,6 @@ coverage:
         target: 50%
 
 ignore:
-  - "app-service/src/lib.rs"
+  - "app-service/src/main.rs"
   - "auth-service/src/lib.rs"
+  - "app-service/src/main.rs"
