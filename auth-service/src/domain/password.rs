@@ -24,7 +24,10 @@ mod tests {
     #[test]
     fn password_shorter_than_8_characters_is_rejected() {
         let password = Password::parse("1234567".to_string());
-        assert_eq!(password, Err("Password must be at least 8 characters long".to_string()));
+        assert_eq!(
+            password,
+            Err("Password must be at least 8 characters long".to_string())
+        );
     }
 
     #[test]
