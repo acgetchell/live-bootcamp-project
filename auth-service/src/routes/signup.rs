@@ -31,8 +31,9 @@ pub async fn signup(
         return Err(AuthAPIError::UserAlreadyExists);
     }
 
-    // TODO: instead of using unwrap, early return AuthAPIError::UnexpectedError if the user could not be added to the user store
-    user_store.add_user(user).unwrap();
+    if user_store.add_user(user).await.is_err() {
+        return Err(AuthAPIError::UnexpectedError);
+    }
 
     let response = Json(SignupResponse {
         message: "User created successfully!".to_string(),
