@@ -9,10 +9,6 @@ use crate::{
 
 use super::SignupRequest;
 
-// pub async fn login() -> impl IntoResponse {
-//     StatusCode::OK.into_response()
-// }
-
 pub async fn login(
     State(state): State<AppState>,
     Json(body): Json<SignupRequest>,
@@ -20,6 +16,18 @@ pub async fn login(
     let email = Email::parse(body.email.clone()).map_err(|_| AuthAPIError::InvalidCredentials)?;
     let password =
         Password::parse(body.password.clone()).map_err(|_| AuthAPIError::InvalidCredentials)?;
+
+    let user_store = state.user_store.read().await;
+
+    // Return AuthAPIError::IncorrectCredentials if email doesn't exist in user_store
+    if user_store.get_user(&email).await.is_err() {
+        return Err(AuthAPIError::IncorrectCredentials);
+    }
+
+    // Return AuthAPIError::IncorrectCredentials if validation fails
+    if user_store.validate_user(&email, &password).await.is_err() {
+        return Err(AuthAPIError::IncorrectCredentials);
+    }
 
     Ok(StatusCode::OK)
 }

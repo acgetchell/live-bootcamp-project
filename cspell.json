@@ -6,7 +6,8 @@
     "words": [
         "Codecov",
         "quickcheck",
-        "reqwest"
+        "reqwest",
+        "wrongpassword"
     ],
     "ignoreWords": [],
     "import": []
