@@ -44,6 +44,11 @@ pub mod services {
     pub use hashmap_user_store::*;
 }
 
+pub mod utils {
+    pub mod auth;
+    pub mod constants;
+}
+
 pub struct Application {
     server: Serve<Router, Router>,
     pub address: String,
