@@ -16,5 +16,5 @@ pub async fn verify_token(
 
 #[derive(Debug, Deserialize)]
 pub struct VerifyTokenRequest {
-    pub token: String,
+    token: String,
 }
