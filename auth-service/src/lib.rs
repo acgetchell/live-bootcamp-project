@@ -1,6 +1,6 @@
 use app_state::AppState;
 use axum::{
-    http::StatusCode,
+    http::{Method, StatusCode},
     response::{IntoResponse, Response},
     routing::post,
     serve::Serve,
@@ -9,7 +9,7 @@ use axum::{
 use domain::AuthAPIError;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use tower_http::services::ServeDir;
+use tower_http::{cors::CorsLayer, services::ServeDir};
 
 pub mod app_state;
 pub mod domain {
@@ -56,6 +56,17 @@ pub struct Application {
 
 impl Application {
     pub async fn build(app_state: AppState, address: &str) -> Result<Self, Box<dyn Error>> {
+        // Allow the app service to call the auth service
+        let allowed_origins = [
+            "http://localhost:8000".parse()?,
+            "http://147.182.208.125:8000".parse()?,
+        ];
+
+        let cors = CorsLayer::new()
+            .allow_methods([Method::GET, Method::POST])
+            .allow_credentials(true)
+            .allow_origin(allowed_origins);
+
         let router = Router::new()
             .nest_service("/", ServeDir::new("assets"))
             .route("/signup", post(routes::signup))
@@ -63,7 +74,8 @@ impl Application {
             .route("/logout", post(routes::logout))
             .route("/verify-2fa", post(routes::verify_2fa))
             .route("/verify-token", post(routes::verify_token))
-            .with_state(app_state);
+            .with_state(app_state)
+            .layer(cors);
 
         let listener = tokio::net::TcpListener::bind(address).await?;
         let address = listener.local_addr()?.to_string();
@@ -93,6 +105,8 @@ impl IntoResponse for AuthAPIError {
             AuthAPIError::IncorrectCredentials => {
                 (StatusCode::UNAUTHORIZED, "Incorrect credentials")
             }
+            AuthAPIError::InvalidToken => (StatusCode::UNAUTHORIZED, "Invalid auth token"),
+            AuthAPIError::MissingToken => (StatusCode::BAD_REQUEST, "Missing auth token"),
             AuthAPIError::UnexpectedError => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Unexpected error")
             }
