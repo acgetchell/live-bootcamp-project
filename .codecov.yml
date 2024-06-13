@@ -12,4 +12,4 @@ coverage:
 ignore:
   - "app-service/src/main.rs"
   - "auth-service/src/lib.rs"
-  - "app-service/src/main.rs"
+  - "auth-service/src/main.rs"

@@ -41,8 +41,10 @@ pub mod routes {
 }
 pub mod services {
     pub mod hashmap_user_store;
+    pub mod hashset_banned_token_store;
     // re-export the modules
     pub use hashmap_user_store::*;
+    pub use hashset_banned_token_store::*;
 }
 
 pub mod utils {
