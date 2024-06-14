@@ -1,6 +1,6 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use axum_extra::extract::CookieJar;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     app_state::AppState,
@@ -23,7 +23,7 @@ pub async fn login(
         Err(_) => return (jar, Err(AuthAPIError::InvalidCredentials)),
     };
 
-    let user_store = state.user_store.read().await;
+    let user_store = &state.user_store.read().await;
 
     // Return AuthAPIError::IncorrectCredentials if validation fails
     if user_store.validate_user(&email, &password).await.is_err() {
@@ -36,19 +36,64 @@ pub async fn login(
         Err(_) => return (jar, Err(AuthAPIError::IncorrectCredentials)),
     };
 
+    match user.requires_2fa {
+        true => handle_2fa(jar).await,
+        false => handle_no_2fa(&user.email, jar).await,
+    }
+}
+
+async fn handle_2fa(
+    jar: CookieJar,
+) -> (
+    CookieJar,
+    Result<(StatusCode, Json<LoginResponse>), AuthAPIError>,
+) {
+    let two_factor_auth = TwoFactorAuthResponse {
+        message: "2FA required".to_string(),
+        login_attempt_id: "123456".to_string(),
+    };
+    let response = Json(LoginResponse::TwoFactorAuth(two_factor_auth));
+
+    (jar, Ok((StatusCode::PARTIAL_CONTENT, response)))
+}
+
+async fn handle_no_2fa(
+    email: &Email,
+    jar: CookieJar,
+) -> (
+    CookieJar,
+    Result<(StatusCode, Json<LoginResponse>), AuthAPIError>,
+) {
     // Generate auth cookie
-    let auth_cookie = match generate_auth_cookie(&user.email) {
+    let auth_cookie = match generate_auth_cookie(email) {
         Ok(cookie) => cookie,
         Err(_) => return (jar, Err(AuthAPIError::UnexpectedError)),
     };
 
     let updated_jar = jar.add(auth_cookie);
 
-    (updated_jar, Ok(StatusCode::OK))
+    (
+        updated_jar,
+        Ok((StatusCode::OK, Json(LoginResponse::RegularAuth))),
+    )
 }
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
+pub enum LoginResponse {
+    RegularAuth,
+    TwoFactorAuth(TwoFactorAuthResponse),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TwoFactorAuthResponse {
+    pub message: String,
+    #[serde(rename = "loginAttemptId")]
+    pub login_attempt_id: String,
 }
