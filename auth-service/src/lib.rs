@@ -16,12 +16,14 @@ pub mod app_state;
 pub mod domain {
     pub mod data_stores;
     pub mod email;
+    pub mod email_client;
     pub mod error;
     pub mod password;
     pub mod user;
     // re-export the modules
     pub use data_stores::*;
     pub use email::*;
+    pub use email_client::*;
     pub use error::*;
     pub use password::*;
     pub use user::*;
@@ -43,6 +45,7 @@ pub mod services {
     pub mod hashmap_two_fa_code_store;
     pub mod hashmap_user_store;
     pub mod hashset_banned_token_store;
+    pub mod mock_email_client;
     // re-export the modules
     pub use hashmap_two_fa_code_store::*;
     pub use hashmap_user_store::*;

@@ -64,11 +64,19 @@ async fn handle_2fa(
         return (jar, Err(AuthAPIError::UnexpectedError));
     }
 
-    let two_factor_auth = TwoFactorAuthResponse {
+    if state
+        .email_client
+        .send_email(email, "2FA Code", two_fa_code.as_ref())
+        .await
+        .is_err()
+    {
+        return (jar, Err(AuthAPIError::UnexpectedError));
+    }
+
+    let response = Json(LoginResponse::TwoFactorAuth(TwoFactorAuthResponse {
         message: "2FA required".to_string(),
         login_attempt_id: login_attempt_id.as_ref().to_owned(),
-    };
-    let response = Json(LoginResponse::TwoFactorAuth(two_factor_auth));
+    }));
 
     (jar, Ok((StatusCode::PARTIAL_CONTENT, response)))
 }
