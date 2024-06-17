@@ -1,4 +1,3 @@
-#![allow(unused_variables)]
 use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 
