@@ -51,7 +51,7 @@ pub async fn verify_2fa(
 
     let updated_jar = jar.add(cookie);
 
-    (updated_jar, Ok(StatusCode::OK))
+    (updated_jar, Ok(StatusCode::OK.into_response()))
 }
 
 #[derive(Debug, Deserialize)]
