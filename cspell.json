@@ -13,6 +13,7 @@
         "jsonwebtoken",
         "quickcheck",
         "reqwest",
+        "sqlx",
         "wrongpassword"
     ],
     "ignoreWords": [],
