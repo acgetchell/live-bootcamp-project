@@ -36,22 +36,12 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          app-service/.cargo/bin/
-          app-service/.cargo/.crates.toml
-          app-service/.cargo/.crates2.json
-          app-service/.cargo/registry/index/
-          app-service/.cargo/registry/cache/
-          app-service/.cargo/git/db/
+          app-service/.cargo
           app-service/target/
-          auth-service/.cargo/bin/
-          auth-service/.cargo/.crates.toml
-          auth-service/.cargo/.crates2.json
-          auth-service/.cargo/registry/index/
-          auth-service/.cargo/registry/cache/
-          auth-service/.cargo/git/db/
+          auth-service/.cargo
           auth-service/target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        # restore-keys: ${{ runner.os }}-cargo-
+        restore-keys: ${{ runner.os }}-cargo-
 
     - name: Install Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
