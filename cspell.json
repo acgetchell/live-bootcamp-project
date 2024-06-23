@@ -9,6 +9,7 @@
         "Codecov",
         "dotenv",
         "dotenvy",
+        "Hasher",
         "hashset",
         "jsonwebtoken",
         "quickcheck",

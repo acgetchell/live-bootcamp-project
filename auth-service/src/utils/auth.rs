@@ -103,7 +103,7 @@ mod tests {
     use std::sync::Arc;
     use tokio::sync::RwLock;
 
-    use crate::{domain::BannedTokenStore, services::HashSetBannedTokenStore};
+    use crate::{domain::BannedTokenStore, services::data_stores::HashSetBannedTokenStore};
 
     use super::*;
 

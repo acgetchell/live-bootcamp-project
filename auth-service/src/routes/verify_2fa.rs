@@ -1,4 +1,3 @@
-#![allow(unused_variables)]
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use axum_extra::extract::CookieJar;
 use serde::Deserialize;
