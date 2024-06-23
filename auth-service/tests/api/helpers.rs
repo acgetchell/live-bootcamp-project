@@ -144,13 +144,13 @@ impl TestApp {
     }
 }
 
-// impl Drop for TestApp {
-//     fn drop(&mut self) {
-//         if !self.clean_up_called {
-//             panic!("TestApp::clean_up was not called before dropping TestApp")
-//         }
-//     }
-// }
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        if !self.clean_up_called {
+            panic!("TestApp::clean_up was not called before dropping TestApp")
+        }
+    }
+}
 
 pub fn get_random_email() -> String {
     format!("{}@example.com", Uuid::new_v4())
