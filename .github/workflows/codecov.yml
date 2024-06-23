@@ -1,4 +1,4 @@
-name: Codecov
+name: Codecov via tarpaulin
 
 on:
   push:
@@ -12,9 +12,21 @@ env:
   SQLX_OFFLINE: true
 
 jobs:
-  check:
-    name: Codecov via tarpaulin
+  build:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres:15.2-alpine
+        # Environment variables scoped only for the postgres service container
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
