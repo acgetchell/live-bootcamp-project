@@ -4,13 +4,12 @@ use auth_service::{
     app_state::{AppState, BannedTokenStoreType, TwoFACodeStoreType},
     get_postgres_pool,
     services::{
-        data_stores::{HashMapTwoFACodeStore, HashMapUserStore, HashSetBannedTokenStore},
+        data_stores::{HashMapTwoFACodeStore, HashSetBannedTokenStore, PostgresUserStore},
         mock_email_client::MockEmailClient,
     },
     utils::constants::{test, DATABASE_URL},
     Application,
 };
-use chrono::format;
 use reqwest::cookie::Jar;
 use sqlx::{postgres::PgPoolOptions, Executor, PgPool};
 use tokio::sync::RwLock;
@@ -27,7 +26,7 @@ pub struct TestApp {
 impl TestApp {
     pub async fn new() -> Self {
         let pg_pool = configure_postgresql().await;
-        let user_store = Arc::new(RwLock::new(HashMapUserStore::default()));
+        let user_store = Arc::new(RwLock::new(PostgresUserStore::new(pg_pool)));
         let banned_token_store = Arc::new(RwLock::new(HashSetBannedTokenStore::default()));
         let two_fa_code_store = Arc::new(RwLock::new(HashMapTwoFACodeStore::default()));
         let email_client = Arc::new(MockEmailClient);

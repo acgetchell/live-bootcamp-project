@@ -1,5 +1,3 @@
-#![allow(unused_variables)]
-
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::sync::RwLock;
