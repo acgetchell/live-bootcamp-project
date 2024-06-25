@@ -7,6 +7,7 @@ use axum::{
     Json, Router,
 };
 use domain::AuthAPIError;
+use redis::{Client, RedisResult};
 use routes::{login, logout, signup, verify_2fa, verify_token};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -48,11 +49,13 @@ pub mod services {
         pub mod hashmap_user_store;
         pub mod hashset_banned_token_store;
         pub mod postgres_user_store;
+        pub mod redis_banned_token_store;
         // re-export the modules
         pub use hashmap_two_fa_code_store::*;
         pub use hashmap_user_store::*;
         pub use hashset_banned_token_store::*;
         pub use postgres_user_store::*;
+        pub use redis_banned_token_store::*;
     }
     pub mod mock_email_client;
 }
@@ -135,4 +138,9 @@ impl IntoResponse for AuthAPIError {
 pub async fn get_postgres_pool(url: &str) -> Result<PgPool, sqlx::Error> {
     // Create a new Postgres connection pool
     PgPoolOptions::new().max_connections(5).connect(url).await
+}
+
+pub fn get_redis_client(redis_hostname: String) -> RedisResult<Client> {
+    let redis_url = format!("redis://{}/", redis_hostname);
+    redis::Client::open(redis_url)
 }

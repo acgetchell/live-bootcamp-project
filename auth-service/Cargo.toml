@@ -23,6 +23,7 @@ rand = "0.8.5"
 sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "postgres", "offline", "migrate"] }
 argon2 = { version = "0.5.3", features = ["std"]}
 test_helpers = { git = "https://github.com/letsgetrusty/test-helpers.git" }
+redis = { version = "0.25.4", features = ["tokio-comp"] }
 
 [dev-dependencies]
 reqwest = { version = "0.12.5", features = ["json", "cookies"] }
