@@ -24,8 +24,10 @@ impl PostgresUserStore {
 
 #[async_trait::async_trait]
 impl UserStore for PostgresUserStore {
+    #[tracing::instrument(name = "Adding user to PostgreSQL", skip_all)]
     async fn add_user(&mut self, user: User) -> Result<(), UserStoreError> {
-        let password_hash = compute_password_hash(user.password.as_ref().to_owned().as_str())
+        let password_hash = compute_password_hash(user.password.as_ref().to_owned())
+            .await
             .map_err(|_| UserStoreError::UnexpectedError)?;
 
         sqlx::query!(
@@ -44,6 +46,7 @@ impl UserStore for PostgresUserStore {
         Ok(())
     }
 
+    #[tracing::instrument(name = "Getting user from PostgreSQL", skip_all)]
     async fn get_user(&self, email: &Email) -> Result<User, UserStoreError> {
         sqlx::query!(
             r#"
@@ -67,6 +70,7 @@ impl UserStore for PostgresUserStore {
         .ok_or(UserStoreError::UserNotFound)?
     }
 
+    #[tracing::instrument(name = "Validating user credentials in PostgreSQL", skip_all)]
     async fn validate_user(
         &self,
         email: &Email,
@@ -74,31 +78,55 @@ impl UserStore for PostgresUserStore {
     ) -> Result<(), UserStoreError> {
         let user = self.get_user(email).await?;
 
-        verify_password_hash(user.password.as_ref(), password.as_ref().to_owned())
-            .map_err(|_| UserStoreError::InvalidCredentials)
+        verify_password_hash(
+            user.password.as_ref().to_owned(),
+            password.as_ref().to_owned(),
+        )
+        .await
+        .map_err(|_| UserStoreError::InvalidCredentials)
     }
 }
-
-fn verify_password_hash(
-    expected_password_hash: &str,
+#[tracing::instrument(name = "Verifying password hash", skip_all)]
+async fn verify_password_hash(
+    expected_password_hash: String,
     password_candidate: String,
-) -> Result<(), Box<dyn Error>> {
-    let expected_password_hash: PasswordHash<'_> = PasswordHash::new(expected_password_hash)?;
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let current_span: tracing::Span = tracing::Span::current();
 
-    Argon2::default()
-        .verify_password(password_candidate.as_bytes(), &expected_password_hash)
-        .map_err(|e| e.into())
+    let result = tokio::task::spawn_blocking(move || {
+        current_span.in_scope(|| {
+            let expected_password_hash: PasswordHash<'_> =
+                PasswordHash::new(&expected_password_hash)?;
+
+            Argon2::default()
+                .verify_password(password_candidate.as_bytes(), &expected_password_hash)
+                .map_err(|e| e.into())
+        })
+    })
+    .await;
+
+    result?
 }
 
-fn compute_password_hash(password: &str) -> Result<String, Box<dyn Error>> {
-    let salt: SaltString = SaltString::generate(&mut rand::thread_rng());
-    let password_hash = Argon2::new(
-        Algorithm::Argon2id,
-        Version::V0x13,
-        Params::new(15000, 2, 1, None)?,
-    )
-    .hash_password(password.as_bytes(), &salt)?
-    .to_string();
+#[tracing::instrument(name = "Computing password hash", skip_all)]
+async fn compute_password_hash(password: String) -> Result<String, Box<dyn Error + Send + Sync>> {
+    let current_span: tracing::Span = tracing::Span::current();
 
-    Ok(password_hash)
+    let result = tokio::task::spawn_blocking(move || {
+        current_span.in_scope(|| {
+            let salt: SaltString = SaltString::generate(&mut rand::thread_rng());
+            let password_hash = Argon2::new(
+                Algorithm::Argon2id,
+                Version::V0x13,
+                Params::new(15000, 2, 1, None)?,
+            )
+            .hash_password(password.as_bytes(), &salt)?
+            .to_string();
+
+            Ok(password_hash)
+        })
+    })
+    .await;
+
+    result?
 }

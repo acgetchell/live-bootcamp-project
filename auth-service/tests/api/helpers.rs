@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::{str::FromStr, sync::Arc};
 
 use auth_service::{
@@ -163,7 +162,7 @@ pub fn get_random_email() -> String {
 async fn configure_postgresql(db_name: &str) -> PgPool {
     let postgres_conn_url = DATABASE_URL.to_owned();
 
-    configure_database(&postgres_conn_url, &db_name).await;
+    configure_database(&postgres_conn_url, db_name).await;
 
     let postgresql_conn_url_with_db = format!("{}/{}", postgres_conn_url, db_name);
 
