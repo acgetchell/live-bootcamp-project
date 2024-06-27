@@ -1,10 +1,12 @@
+use color_eyre::eyre::{eyre, Result};
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Password(String);
 
 impl Password {
-    pub fn parse(s: String) -> Result<Password, String> {
+    pub fn parse(s: String) -> Result<Password> {
         if s.len() < 8 {
-            Err("Password must be at least 8 characters long".to_string())
+            Err(eyre!("Password must be at least 8 characters long"))
         } else {
             Ok(Self(s))
         }
@@ -24,10 +26,7 @@ mod tests {
     #[test]
     fn password_shorter_than_8_characters_is_rejected() {
         let password = Password::parse("1234567".to_string());
-        assert_eq!(
-            password,
-            Err("Password must be at least 8 characters long".to_string())
-        );
+        assert!(password.is_err(),);
     }
 
     #[test]

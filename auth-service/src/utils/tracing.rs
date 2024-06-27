@@ -1,13 +1,33 @@
+use color_eyre::eyre::Result;
 use std::time::Duration;
+use tracing_error::ErrorLayer;
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::{fmt, EnvFilter};
 
 use axum::{body::Body, extract::Request, response::Response};
 use tracing::{Level, Span};
 
-pub fn init_tracing() {
-    tracing_subscriber::fmt()
-        .compact()
-        .with_max_level(tracing::Level::DEBUG)
+pub fn init_tracing() -> Result<()> {
+    // Create a formatting layer for tracing output with a compact format
+    let fmt_layer = fmt::layer().compact();
+
+    // Create a filter layer to control the verbosity of tracing output
+    let filter_layer = EnvFilter::try_from_default_env().or_else(|_| EnvFilter::try_new("info"))?;
+
+    // Build the tracing subscriber registry with the formatting layer,
+    // the filter layer, and the error layer
+    tracing_subscriber::registry()
+        .with(filter_layer)
+        .with(fmt_layer)
+        .with(ErrorLayer::default())
         .init();
+
+    Ok(())
+
+    // tracing_subscriber::fmt()
+    //     .compact()
+    //     .with_max_level(tracing::Level::DEBUG)
+    //     .init();
 }
 
 pub fn make_span_with_request_id(request: &Request<Body>) -> Span {

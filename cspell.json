@@ -16,6 +16,7 @@
         "quickcheck",
         "reqwest",
         "sqlx",
+        "thiserror",
         "wrongpassword"
     ],
     "ignoreWords": [],

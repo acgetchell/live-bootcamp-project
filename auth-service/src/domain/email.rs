@@ -1,14 +1,15 @@
+use color_eyre::eyre::{eyre, Result};
 use validator::ValidateEmail;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Email(String);
 
 impl Email {
-    pub fn parse(s: String) -> Result<Email, String> {
+    pub fn parse(s: String) -> Result<Email> {
         if s.validate_email() {
             Ok(Self(s))
         } else {
-            Err(format!("{} is not a valid email", s))
+            Err(eyre!(format!("{} is not a valid email", s)))
         }
     }
 }
@@ -26,25 +27,25 @@ mod tests {
     #[test]
     fn empty_string_is_rejected() {
         let email = Email::parse("".to_string());
-        assert_eq!(email, Err(" is not a valid email".to_string()));
+        assert!(email.is_err());
     }
 
     #[test]
     fn mail_missing_at_symbol_is_rejected() {
         let email = Email::parse("test.com".to_string());
-        assert_eq!(email, Err("test.com is not a valid email".to_string()));
+        assert!(email.is_err());
     }
 
     #[test]
     fn mail_missing_domain_is_rejected() {
         let email = Email::parse("test@".to_string());
-        assert_eq!(email, Err("test@ is not a valid email".to_string()));
+        assert!(email.is_err());
     }
 
     #[test]
     fn mail_missing_address_is_rejected() {
         let email = Email::parse("@test.com".to_string());
-        assert_eq!(email, Err("@test.com is not a valid email".to_string()));
+        assert!(email.is_err());
     }
 
     #[test]
