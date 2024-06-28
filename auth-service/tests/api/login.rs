@@ -4,6 +4,10 @@ use auth_service::{
 };
 use secrecy::{ExposeSecret, Secret};
 use test_helpers::api_test;
+use wiremock::{
+    matchers::{method, path},
+    Mock, ResponseTemplate,
+};
 
 #[api_test]
 async fn should_return_206_if_valid_credentials_and_2fa_enabled() {
@@ -19,6 +23,13 @@ async fn should_return_206_if_valid_credentials_and_2fa_enabled() {
 
     // Created user
     assert_eq!(response.status().as_u16(), 201);
+
+    Mock::given(path("/email"))
+        .and(method("POST"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&app.email_server)
+        .await;
 
     let login_body = serde_json::json!({
         "email": random_email,

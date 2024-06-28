@@ -27,7 +27,7 @@ impl BannedTokenStore for RedisBannedTokenStore {
         &mut self,
         token: Secret<String>,
     ) -> Result<(), BannedTokenStoreError> {
-        let token_key = get_key(&token.expose_secret());
+        let token_key = get_key(token.expose_secret());
 
         let value = true;
 

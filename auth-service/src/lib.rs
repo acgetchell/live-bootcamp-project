@@ -63,6 +63,7 @@ pub mod services {
         pub use redis_two_fa_code_store::*;
     }
     pub mod mock_email_client;
+    pub mod postmark_email_client;
 }
 
 pub mod utils {

@@ -17,6 +17,7 @@
         "reqwest",
         "sqlx",
         "thiserror",
+        "wiremock",
         "wrongpassword"
     ],
     "ignoreWords": [],
