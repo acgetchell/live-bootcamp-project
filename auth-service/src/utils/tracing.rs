@@ -23,11 +23,6 @@ pub fn init_tracing() -> Result<()> {
         .init();
 
     Ok(())
-
-    // tracing_subscriber::fmt()
-    //     .compact()
-    //     .with_max_level(tracing::Level::DEBUG)
-    //     .init();
 }
 
 pub fn make_span_with_request_id(request: &Request<Body>) -> Span {
@@ -37,8 +32,7 @@ pub fn make_span_with_request_id(request: &Request<Body>) -> Span {
         "[REQUEST]",
         method = tracing::field::display(request.method()),
         uri = tracing::field::display(request.uri()),
-        // The version field is removed because `axum::http::Version` does not implement `std::fmt::Display`
-        // version = tracing::field::display(request.version()),
+        version = tracing::field::debug(request.version()),
         request_id = tracing::field::display(request_id),
     )
 }
